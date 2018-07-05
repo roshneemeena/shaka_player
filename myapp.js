@@ -5,7 +5,7 @@ var licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
     
 
 function initApp() {
-    shaka.log.setLevel(shaka.log.Level.DEBUG);
+   shaka.log.setLevel(shaka.log.Level.DEBUG);
   // Install built-in polyfills to patch browser incompatibilities.
   shaka.polyfill.installAll();
   
@@ -26,11 +26,10 @@ function initApp() {
 }
 
 function initPlayer() {
-  // Create a Player instance.
+  
   var video = document.getElementById('video');
   var player = new shaka.Player(video);
 
-  // Attach player to the window to make it easy to access in the JS console.
   window.player = player;
 
   
@@ -60,6 +59,13 @@ function onError(error) {
   console.error('Error code', error.code, 'object', error);
 }
 
+/**
+ * 
+ * @param {type} tracks
+ * @returns {Array}
+ * This function is to select the highest bandwidth track
+ */
+
 function selectTracks(tracks) {
  
   var found = tracks
@@ -69,6 +75,12 @@ function selectTracks(tracks) {
   console.log('Offline Track: ' + found);
   return [ found ];
 }
+/**
+ * 
+ * @param {type} player
+ * @returns {undefined}
+ * This function to initialize the storage
+ */
 function initStorage(player) {
   
   window.storage = new shaka.offline.Storage(player);
@@ -77,19 +89,42 @@ function initStorage(player) {
     trackSelectionCallback: selectTracks
   });
 }
+/**
+ * 
+ * @returns {!Promise.<!Array.<shaka.extern.StoredContent>>}
+ * This function is to return all the downloaded contents
+ */
 function listContent() {
   return window.storage.list();
 }
-
+/**
+ * 
+ * @param {type} content
+ * @returns {undefined}
+ * This function is to play the offline content
+ */
 function playContent(content) {
   window.player.load(content.offlineUri);
   console.log('**VoD(Video On Demand) is played**')
 }
 
+/**
+ * 
+ * @param {type} content
+ * @returns {Promise|this.constructor|nm$_crc32-stream.module.exports.prototype.then.prom|Object.prototype.then.prom|nm$_index.Command.prototype.then.prom|!Promise.<T>|!Promise}
+ * This function is to remove the content from  the storage
+ */
 function removeContent(content) {
   return window.storage.remove(content.offlineUri);
   
 }
+/**
+ *
+ * @param {type} manifestUri
+ * @param {type} title
+ * @returns {!Promise.<shaka.extern.StoredContent>|Promise|this.constructor|nm$_crc32-stream.module.exports.prototype.then.prom|Object.prototype.then.prom|nm$_index.Command.prototype.then.prom|!Promise.<T>}
+ * This function is to save the content with storage
+ */
 
 function downloadContent(manifestUri, title) {
   
@@ -104,7 +139,13 @@ function downloadContent(manifestUri, title) {
   return window.storage.store(manifestUri, metadata);
 }
 
-
+/**
+ * 
+ * @returns {undefined}
+ * When the download button is clicked the download starts. This function disables the
+ * download button until the download completes
+ * 
+ */
 function onDownloadClick() {
   var downloadButton = document.getElementById('download-button');
   var manifestUri = document.getElementById('asset-uri-input').value;
@@ -124,8 +165,7 @@ function onDownloadClick() {
       downloadButton.disabled = false;
     })
     .catch(function(error) {
-      // In the case of an error, re-enable the download button so
-      // that the user can try to download another item.
+      
       downloadButton.disabled = false;
       onError(error);
     });
@@ -146,12 +186,23 @@ function updateOnlineStatus() {
   }
 }
 
+/**
+ * 
+ * @param {type} content
+ * @param {type} progress
+ * @returns {undefined}
+ * This function is to show the progress during download
+ */
 
 function setDownloadProgress(content, progress) {
   var progressBar = document.getElementById('progress-bar');
   progressBar.value = progress * progressBar.max;
 }
-
+/**
+ * 
+ * @returns {unresolved}
+ * clear the table and repopulate with the current list of downloaded content
+ */
 function refreshContentList() {
   var contentTable = document.getElementById('content-table');
 
